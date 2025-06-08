@@ -30,6 +30,11 @@ public class SqlDatabase implements Database {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 first_name TEXT NOT NULL,
                 last_name TEXT NOT NULL,
+                sex TEXT NOT NULL,
+                unit TEXT NOT NULL,
+                height TEXT NOT NULL,
+                weight TEXT NOT NULL,
+                dob TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL
             );
@@ -41,15 +46,20 @@ public class SqlDatabase implements Database {
         }
     }
 
-    public boolean registerUser(String firstName, String lastName, String email, String password) {
+    public boolean registerUser(String firstName, String lastName, String sex, String unit, String height, String weight, String dob, String email, String password) {
         if (emailExists(email)) return false;
 
-        String sql = "INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO users (first_name, last_name, sex, unit, height, weight, dob, email, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, firstName);
             stmt.setString(2, lastName);
-            stmt.setString(3, email);
-            stmt.setString(4, password);
+            stmt.setString(3, sex);
+            stmt.setString(4, unit);
+            stmt.setString(5, height);
+            stmt.setString(6, weight);
+            stmt.setString(7, dob);
+            stmt.setString(8, email);
+            stmt.setString(9, password);
             int rows = stmt.executeUpdate();
             return rows == 1;
         } catch (SQLException e) {

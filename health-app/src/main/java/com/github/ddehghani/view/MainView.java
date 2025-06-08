@@ -9,53 +9,46 @@ public class MainView extends JFrame {
 
     private LoginPanel loginPanel;
     private RegisterPanel registerPanel;
+    private HomePanel homePanel;
 
     public static final String LOGIN = "Login";
     public static final String REGISTER = "Register";
+    public static final String HOME = "Home";
 
     public MainView() {
         setTitle("Health App");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(400, 300);
+        setSize(500, 500);
+        setMinimumSize(new Dimension(400, 500));
         setLocationRelativeTo(null); // Center the window
 
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        loginPanel = new LoginPanel(mainPanel, cardLayout);
-        registerPanel = new RegisterPanel(mainPanel, cardLayout);
+        loginPanel = new LoginPanel();
+        registerPanel = new RegisterPanel();
+        homePanel = new HomePanel();
 
         mainPanel.add(loginPanel, LOGIN);
         mainPanel.add(registerPanel, REGISTER);
+        mainPanel.add(homePanel, HOME);
 
         showCard(LOGIN); // Show login panel at startup
         add(mainPanel);
     }  
 
-    /**
-     * Method to show a specific card in the CardLayout.
-     * 
-     * @param cardName The name of the card to show.
-     */
     public void showCard(String cardName) {
         cardLayout.show(mainPanel, cardName);
     }
 
-
-    /**
-     * Getters for the login and register panels.
-     * 
-     * @return The login or register panel.
-     */
     public LoginPanel getLoginPanel() {
         return loginPanel;
     }
 
-    /**
-     * Getters for the login and register panels.
-     * 
-     * @return The login or register panel.
-     */
+    public HomePanel getHomePanel() {
+        return homePanel;
+    }
+
     public RegisterPanel getRegisterPanel() {
         return registerPanel;
     }

@@ -49,3 +49,6 @@ out/
 
 # Compiled class files
 *.class
+
+# Database files
+*.db

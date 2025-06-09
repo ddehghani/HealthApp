@@ -40,19 +40,21 @@ public class MainController {
             mainView.showMessage("You have been logged out.");
             mainView.showCard(MainView.LOGIN);
         });
-        // mainView.getAddMealPanel().addBackListener(e -> mainView.showCard(MainView.HOME));
-        // mainView.getChangeProfilePanel().addBackListener(e -> mainView.showCard(MainView.HOME));
+        mainView.getAddMealPanel().addBackListener(e -> mainView.showCard(MainView.HOME));
+        mainView.getAddMealPanel().addAddMealListener(e -> {
+            // db.addMeal(new Meal(
+                
+            // ), currentUser.getEmail());
+            mainView.showMessage("Add Meal feature is not implemented yet.");
+        });
+        mainView.getChangeProfilePanel().addSaveProfileListener(e -> handleSaveProfile());
+        mainView.getChangeProfilePanel().addBackListener(e -> mainView.showCard(MainView.HOME));
+
         // mainView.getFoodReplacementPanel().addBackListener(e -> mainView.showCard(MainView.HOME));
         // mainView.getFoodReplacementPanel().addReplaceListener(e -> {
         //     // Handle food replacement logic here
         //     mainView.showMessage("Food replacement feature is not implemented yet.");
         // });
-        // mainView.getAddMealPanel().addMealListener(e -> {
-        //     // Handle adding meal logic here
-        //     mainView.showMessage("Add Meal feature is not implemented yet.");
-        // });
-        mainView.getChangeProfilePanel().addSaveProfileListener(e -> handleSaveProfile());
-        mainView.getChangeProfilePanel().addBackListener(e -> mainView.showCard(MainView.HOME));
     }
 
     private void handleLogin() {

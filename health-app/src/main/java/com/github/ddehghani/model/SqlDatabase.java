@@ -60,7 +60,7 @@ public class SqlDatabase implements Database {
             stmt.setString(4, user.getUnit());
             stmt.setString(5, user.getHeight());
             stmt.setString(6, user.getWeight());
-            stmt.setString(7, User.DATE_FORMAT.format(user.getDob()));
+            stmt.setString(7, DATE_FORMAT.format(user.getDob()));
             stmt.setString(8, user.getEmail());
             stmt.setString(9, user.getPassword());
             int rows = stmt.executeUpdate();
@@ -81,7 +81,7 @@ public class SqlDatabase implements Database {
                 String storedPassword = rs.getString("password");
                 if (password.equals(storedPassword)) {
                     try {
-                        Date dob = User.DATE_FORMAT.parse(rs.getString("dob"));
+                        Date dob = DATE_FORMAT.parse(rs.getString("dob"));
                         User user = new User(
                             rs.getString("first_name"),
                             rs.getString("last_name"),
@@ -128,7 +128,7 @@ public class SqlDatabase implements Database {
             stmt.setString(4, user.getUnit());
             stmt.setString(5, user.getHeight());
             stmt.setString(6, user.getWeight());
-            stmt.setString(7, User.DATE_FORMAT.format(user.getDob()));
+            stmt.setString(7, DATE_FORMAT.format(user.getDob()));
             stmt.setString(8, user.getPassword());
             stmt.setString(9, user.getEmail());
             int rows = stmt.executeUpdate();
@@ -137,5 +137,9 @@ public class SqlDatabase implements Database {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public boolean addMeal(Meal meal, String email) {
+        return false; // Not implemented in this example
     }
 }

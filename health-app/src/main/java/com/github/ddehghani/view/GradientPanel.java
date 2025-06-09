@@ -2,16 +2,22 @@ package com.github.ddehghani.view;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.RadialGradientPaint;
 
 public class GradientPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
-        Color color1 = new Color(240, 240, 255);
-        Color color2 = new Color(200, 200, 240);
-        GradientPaint gp = new GradientPaint(0, 0, color1, 0, getHeight(), color2);
-        g2d.setPaint(gp);
-        g2d.fillRect(0, 0, getWidth(), getHeight());
+        Graphics2D g2d = (Graphics2D) g.create();
+        int width = getWidth();
+        int height = getHeight();
+        Point center = new Point(width / 2, height / 2);
+        float radius = Math.max(width, height);
+        float[] dist = {0.0f, 1.0f};
+        Color[] colors = {new Color(180, 130, 255), new Color(255, 255, 255)}; // purple to white
+        RadialGradientPaint paint = new RadialGradientPaint(center, radius, dist, colors);
+        g2d.setPaint(paint);
+        g2d.fillRect(0, 0, width, height);
+        g2d.dispose();
     }
 }

@@ -1,10 +1,7 @@
 package com.github.ddehghani.model;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class User {
-    public static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private String firstName;
     private String lastName;
     private String sex;

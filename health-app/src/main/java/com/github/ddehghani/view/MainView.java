@@ -10,10 +10,17 @@ public class MainView extends JFrame {
     private LoginPanel loginPanel;
     private RegisterPanel registerPanel;
     private HomePanel homePanel;
+    private AddMealPanel addMealPanel;
+    private ChangeProfilePanel changeProfilePanel;
+    private FoodReplacementPanel foodReplacementPanel;
 
     public static final String LOGIN = "Login";
     public static final String REGISTER = "Register";
     public static final String HOME = "Home";
+    public static final String ADD_MEAL = "Add Meal";
+    public static final String CHANGE_PROFILE = "Change Profile";
+    public static final String FOOD_REPLACEMENT = "Food Replacement";
+    
 
     public MainView() {
         setTitle("Health App");
@@ -28,12 +35,17 @@ public class MainView extends JFrame {
         loginPanel = new LoginPanel();
         registerPanel = new RegisterPanel();
         homePanel = new HomePanel();
+        addMealPanel = new AddMealPanel();
+        changeProfilePanel = new ChangeProfilePanel();
+        foodReplacementPanel = new FoodReplacementPanel();
 
         mainPanel.add(loginPanel, LOGIN);
         mainPanel.add(registerPanel, REGISTER);
         mainPanel.add(homePanel, HOME);
-
-        showCard(LOGIN); // Show login panel at startup
+        mainPanel.add(addMealPanel, ADD_MEAL);
+        mainPanel.add(changeProfilePanel, CHANGE_PROFILE);
+        mainPanel.add(foodReplacementPanel, FOOD_REPLACEMENT);
+        
         add(mainPanel);
     }  
 
@@ -47,6 +59,18 @@ public class MainView extends JFrame {
 
     public HomePanel getHomePanel() {
         return homePanel;
+    }
+
+    public AddMealPanel getAddMealPanel() {
+        return addMealPanel;
+    }
+
+    public ChangeProfilePanel getChangeProfilePanel() {
+        return changeProfilePanel;
+    }
+
+    public FoodReplacementPanel getFoodReplacementPanel() {
+        return foodReplacementPanel;
     }
 
     public RegisterPanel getRegisterPanel() {

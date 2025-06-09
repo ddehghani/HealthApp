@@ -5,8 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 
-public class LoginPanel extends JPanel {
-
+public class LoginPanel extends GradientPanel {
     private JButton loginButton;
     private JButton switchToRegister;
     private JTextField emailField;
@@ -46,17 +45,6 @@ public class LoginPanel extends JPanel {
 
         gbc.gridy++;
         add(switchToRegister, gbc);
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
-        Color color1 = new Color(240, 240, 255);
-        Color color2 = new Color(200, 200, 240);
-        GradientPaint gp = new GradientPaint(0, 0, color1, 0, getHeight(), color2);
-        g2d.setPaint(gp);
-        g2d.fillRect(0, 0, getWidth(), getHeight());
     }
 
     public String getEmail() {

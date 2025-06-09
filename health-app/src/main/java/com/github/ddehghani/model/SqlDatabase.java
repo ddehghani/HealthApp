@@ -1,6 +1,9 @@
 package com.github.ddehghani.model;
 
 import java.sql.*;
+import java.text.ParseException;
+import java.util.Optional;
+import java.util.Date;
 
 public class SqlDatabase implements Database {
     private static SqlDatabase instance;
@@ -46,20 +49,20 @@ public class SqlDatabase implements Database {
         }
     }
 
-    public boolean registerUser(String firstName, String lastName, String sex, String unit, String height, String weight, String dob, String email, String password) {
-        if (emailExists(email)) return false;
+    public boolean registerUser(User user) {
+        if (emailExists(user.getEmail())) return false;
 
         String sql = "INSERT INTO users (first_name, last_name, sex, unit, height, weight, dob, email, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, firstName);
-            stmt.setString(2, lastName);
-            stmt.setString(3, sex);
-            stmt.setString(4, unit);
-            stmt.setString(5, height);
-            stmt.setString(6, weight);
-            stmt.setString(7, dob);
-            stmt.setString(8, email);
-            stmt.setString(9, password);
+            stmt.setString(1, user.getFirstName());
+            stmt.setString(2, user.getLastName());
+            stmt.setString(3, user.getSex());
+            stmt.setString(4, user.getUnit());
+            stmt.setString(5, user.getHeight());
+            stmt.setString(6, user.getWeight());
+            stmt.setString(7, User.DATE_FORMAT.format(user.getDob()));
+            stmt.setString(8, user.getEmail());
+            stmt.setString(9, user.getPassword());
             int rows = stmt.executeUpdate();
             return rows == 1;
         } catch (SQLException e) {
@@ -68,21 +71,39 @@ public class SqlDatabase implements Database {
         }
     }
 
-    public boolean authenticateUser(String email, String password) {
-        String sql = "SELECT password FROM users WHERE email = ?";
+    public Optional<User> authenticateUser(String email, String password) {
+        String sql = "SELECT * FROM users WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, email);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
                 String storedPassword = rs.getString("password");
-                return password.equals(storedPassword);
-            } else {
-                return false;
+                if (password.equals(storedPassword)) {
+                    try {
+                        Date dob = User.DATE_FORMAT.parse(rs.getString("dob"));
+                        User user = new User(
+                            rs.getString("first_name"),
+                            rs.getString("last_name"),
+                            rs.getString("sex"),
+                            rs.getString("unit"),
+                            rs.getString("height"),
+                            rs.getString("weight"),
+                            dob,
+                            rs.getString("email"),
+                            storedPassword
+                        );
+                        return Optional.of(user);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                        return Optional.empty();
+                    }
+                }
             }
+            return Optional.empty();
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+            return Optional.empty();
         }
     }
 
@@ -95,6 +116,26 @@ public class SqlDatabase implements Database {
         } catch (SQLException e) {
             e.printStackTrace();
             return true;
+        }
+    }
+
+    public boolean updateUserProfile(User user) {
+        String sql = "UPDATE users SET first_name = ?, last_name = ?, sex = ?, unit = ?, height = ?, weight = ?, dob = ?, password = ? WHERE email = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, user.getFirstName());
+            stmt.setString(2, user.getLastName());
+            stmt.setString(3, user.getSex());
+            stmt.setString(4, user.getUnit());
+            stmt.setString(5, user.getHeight());
+            stmt.setString(6, user.getWeight());
+            stmt.setString(7, User.DATE_FORMAT.format(user.getDob()));
+            stmt.setString(8, user.getPassword());
+            stmt.setString(9, user.getEmail());
+            int rows = stmt.executeUpdate();
+            return rows == 1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }

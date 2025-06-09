@@ -2,12 +2,14 @@ package com.github.ddehghani.view;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
-public class HomePanel extends JPanel {
+public class HomePanel extends GradientPanel {
     private JLabel welcomeLabel;
-    public JButton addMealButton;
-    public JButton changeProfileButton;
-    public JButton foodReplacementButton;
+    private JButton addMealButton,
+                    changeProfileButton,
+                    foodReplacementButton,
+                    logoutButton;
 
     public HomePanel() {
         setLayout(new GridBagLayout());
@@ -32,9 +34,29 @@ public class HomePanel extends JPanel {
         foodReplacementButton = new JButton("Make Food Item Replacements");
         gbc.gridy = 3;
         add(foodReplacementButton, gbc);
+
+        logoutButton = new JButton("Logout");
+        gbc.gridy = 4;
+        add(logoutButton, gbc);
     }
 
     public void setWelcomeMessage(String firstName) {
         welcomeLabel.setText("Welcome, " + firstName + "!");
+    }
+
+    public void addAddMealListener(ActionListener listener) {
+        addMealButton.addActionListener(listener);
+    }
+
+    public void addChangeProfileListener(ActionListener listener) {
+        changeProfileButton.addActionListener(listener);
+    }
+
+    public void addFoodReplacementListener(ActionListener listener) {
+        foodReplacementButton.addActionListener(listener);
+    }
+
+    public void addLogoutListener(ActionListener listener) {
+        logoutButton.addActionListener(listener);
     }
 }

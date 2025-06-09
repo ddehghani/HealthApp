@@ -4,6 +4,8 @@ import java.sql.*;
 import java.text.ParseException;
 import java.util.Optional;
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
 
 public class SqlDatabase implements Database {
     private static SqlDatabase instance;
@@ -44,6 +46,25 @@ public class SqlDatabase implements Database {
             """;
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String mealTableSql = """
+            CREATE TABLE IF NOT EXISTS meals (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT NOT NULL,
+                date TEXT NOT NULL,
+                type TEXT NOT NULL,
+                calories REAL NOT NULL,
+                proteins REAL NOT NULL,
+                carbs REAL NOT NULL,
+                fats REAL NOT NULL,
+                FOREIGN KEY (email) REFERENCES users(email)
+            );
+            """;
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(mealTableSql);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -139,7 +160,74 @@ public class SqlDatabase implements Database {
         }
     }
 
+    public String[] getIngredients() {
+        return new String[] {
+            "Chicken", "Beef", "Fish", "Rice", "Pasta", "Vegetables", "Fruits", "Dairy", "Nuts", "Grains", "Eggs"
+        }; // Example ingredients, replace with actual implementation
+    }
+
     public boolean addMeal(Meal meal, String email) {
-        return false; // Not implemented in this example
+        String sql = "INSERT INTO meals (email, date, type, calories, proteins, carbs, fats) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            stmt.setString(2, DATE_FORMAT.format(meal.getDate()));
+            stmt.setString(3, meal.getType());
+            stmt.setDouble(4, meal.getCalories());
+            stmt.setDouble(5, meal.getProteins());
+            stmt.setDouble(6, meal.getCarbs());
+            stmt.setDouble(7, meal.getFats());
+            return stmt.executeUpdate() == 1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public List<Meal> getMeals(String email) {
+        List<Meal> meals = new ArrayList<>();
+        String sql = "SELECT * FROM meals WHERE email = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Date date = DATE_FORMAT.parse(rs.getString("date"));
+                String type = rs.getString("type");
+                double calories = rs.getDouble("calories");
+                double proteins = rs.getDouble("proteins");
+                double carbs = rs.getDouble("carbs");
+                double fats = rs.getDouble("fats");
+                Meal meal = new Meal(date, type, new ArrayList<>(), calories, proteins, carbs, fats);
+                meals.add(meal);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return meals;
+    }
+
+    @Override
+    public List<Meal> getMeals(String email, String startDate, String endDate) {
+        List<Meal> meals = new ArrayList<>();
+        String sql = "SELECT * FROM meals WHERE email = ? AND date BETWEEN ? AND ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            stmt.setString(2, startDate);
+            stmt.setString(3, endDate);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Date date = DATE_FORMAT.parse(rs.getString("date"));
+                String type = rs.getString("type");
+                double calories = rs.getDouble("calories");
+                double proteins = rs.getDouble("proteins");
+                double carbs = rs.getDouble("carbs");
+                double fats = rs.getDouble("fats");
+                Meal meal = new Meal(date, type, new ArrayList<>(), calories, proteins, carbs, fats);
+                meals.add(meal);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return meals;
     }
 }

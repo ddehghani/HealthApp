@@ -1,19 +1,21 @@
 package com.github.ddehghani.view;
 
+import com.github.ddehghani.model.Ingredient;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.stream.Collectors;
+import java.util.List;
 
 public class AddMealPanel extends GradientPanel {
+    private String[] ingredients = new String[]{};
     private JSpinner dateSpinner;
     private JComboBox<String> mealTypeComboBox;
     private java.util.List<JComboBox<String>> ingredientComboBoxes = new ArrayList<>();
     private java.util.List<JTextField> quantityFields = new ArrayList<>();
     private JPanel ingredientsPanel;
-    private JButton addIngredientButton;
     private JButton backButton;
     private JButton addMealButton;
 
@@ -51,16 +53,17 @@ public class AddMealPanel extends GradientPanel {
         gbc.anchor = GridBagConstraints.LINE_START;
         add(mealTypeComboBox, gbc);
 
-        // Ingredients panel and add ingredient button
-        ingredientsPanel = new JPanel();
-        ingredientsPanel.setLayout(new GridBagLayout());
+        // Ingredients panel initialization and placement
+        ingredientsPanel = new JPanel(new GridBagLayout());
         ingredientsPanel.setOpaque(false);
-        GridBagConstraints ingGbc = new GridBagConstraints();
-        ingGbc.insets = new Insets(2, 2, 2, 2);
-        ingGbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        add(ingredientsPanel, gbc);
+
         addIngredientField(0);
 
-        addIngredientButton = new JButton("Add Ingredient");
+        JButton addIngredientButton = new JButton("Add Ingredient");
         addIngredientButton.addActionListener(e -> {
             if (ingredientComboBoxes.size() < 4) {
                 addIngredientField(ingredientComboBoxes.size());
@@ -69,14 +72,29 @@ public class AddMealPanel extends GradientPanel {
             }
         });
 
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        add(ingredientsPanel, gbc);
+        JButton removeIngredientButton = new JButton("Remove Ingredient");
+        removeIngredientButton.addActionListener(e -> {
+            int lastIndex = ingredientComboBoxes.size() - 1;
+            if (lastIndex >= 0) {
+                ingredientComboBoxes.remove(lastIndex);
+                quantityFields.remove(lastIndex);
+                // Each ingredient row is 4 components: label, combo, qty label, qty field
+                for (int i = 0; i < 4 && ingredientsPanel.getComponentCount() >= 4; i++) {
+                    ingredientsPanel.remove(ingredientsPanel.getComponentCount() - 1);
+                }
+                ingredientsPanel.revalidate();
+                ingredientsPanel.repaint();
+            }
+        });
 
+        JPanel ingredientButtonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        ingredientButtonsPanel.setOpaque(false);
+        ingredientButtonsPanel.add(addIngredientButton);
+        ingredientButtonsPanel.add(removeIngredientButton);
         gbc.gridy = 3;
-        add(addIngredientButton, gbc);
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        add(ingredientButtonsPanel, gbc);
 
         // Buttons panel
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -100,7 +118,7 @@ public class AddMealPanel extends GradientPanel {
         gbc.anchor = GridBagConstraints.LINE_END;
         ingredientsPanel.add(new JLabel("Ingredient " + (index + 1) + ":"), gbc);
 
-        JComboBox<String> ingredientComboBox = new JComboBox<>();
+        JComboBox<String> ingredientComboBox = new JComboBox<>(ingredients);
         ingredientComboBox.setPreferredSize(new Dimension(150, 25));
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.LINE_START;
@@ -119,9 +137,7 @@ public class AddMealPanel extends GradientPanel {
     }
 
     public void setIngredientsList(String[] ingredients) {
-        for (JComboBox<String> comboBox : ingredientComboBoxes) {
-            comboBox.setModel(new DefaultComboBoxModel<>(ingredients));
-        }
+        this.ingredients = ingredients;
     }
 
     public void addBackButtonListener(ActionListener listener) {
@@ -138,18 +154,6 @@ public class AddMealPanel extends GradientPanel {
 
     public String getSelectedMealType() {
         return (String) mealTypeComboBox.getSelectedItem();
-    }
-
-    public java.util.List<String> getSelectedIngredients() {
-        return ingredientComboBoxes.stream()
-                .map(cb -> (String) cb.getSelectedItem())
-                .collect(Collectors.toList());
-    }
-
-    public java.util.List<String> getQuantities() {
-        return quantityFields.stream()
-                .map(JTextField::getText)
-                .collect(Collectors.toList());
     }
 
     public void clearFields() {
@@ -174,8 +178,21 @@ public class AddMealPanel extends GradientPanel {
     }
 
     public void setIngredients(String[] ingredients) {
+        this.ingredients = ingredients;
         for (JComboBox<String> comboBox : ingredientComboBoxes) {
             comboBox.setModel(new DefaultComboBoxModel<>(ingredients));
         }
     }
+
+    public List<Ingredient> getSelectedIngredients() {
+        List<Ingredient> result = new ArrayList<>();
+        for (int i = 0; i < ingredientComboBoxes.size(); i++) {
+            String name = (String) ingredientComboBoxes.get(i).getSelectedItem();
+            String quantity = quantityFields.get(i).getText();
+            result.add(new Ingredient(name, quantity));
+        }
+        return result;
+    }
+
+
 }

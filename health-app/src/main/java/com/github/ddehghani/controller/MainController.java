@@ -2,8 +2,7 @@ package com.github.ddehghani.controller;
 
 import com.github.ddehghani.model.*;
 import com.github.ddehghani.view.*;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 
 public class MainController {
     private final MainView mainView;
@@ -29,12 +28,23 @@ public class MainController {
             mainView.showCard(MainView.LOGIN);
         });
         mainView.getRegisterPanel().addRegisterButtonListener(e -> handleRegister());
-        mainView.getHomePanel().addAddMealListener(e -> mainView.showCard(MainView.ADD_MEAL));
+        mainView.getHomePanel().addAddMealListener(e -> {
+            mainView.getAddMealPanel().setIngredients(db.getIngredients());
+            mainView.showCard(MainView.ADD_MEAL);
+        });
         mainView.getHomePanel().addChangeProfileListener(e -> {
             mainView.getChangeProfilePanel().setUserDetails(currentUser);
             mainView.showCard(MainView.CHANGE_PROFILE);
         });
-        mainView.getHomePanel().addFoodReplacementListener(e -> mainView.showCard(MainView.FOOD_REPLACEMENT));
+
+        mainView.getHomePanel().addFoodReplacementListener(e -> {
+            List<Meal> meals = db.getMeals(currentUser.getEmail());
+            String[] mealOptions = meals.stream()
+                    .map(Meal::toString)
+                    .toArray(String[]::new);
+            mainView.getFoodReplacementPanel().setMealOptions(mealOptions);
+            mainView.showCard(MainView.FOOD_REPLACEMENT);
+        });
         mainView.getHomePanel().addLogoutListener(e -> {
             currentUser = null;
             mainView.showMessage("You have been logged out.");
@@ -42,19 +52,40 @@ public class MainController {
         });
         mainView.getAddMealPanel().addBackListener(e -> mainView.showCard(MainView.HOME));
         mainView.getAddMealPanel().addAddMealListener(e -> {
-            // db.addMeal(new Meal(
-                
-            // ), currentUser.getEmail());
-            mainView.showMessage("Add Meal feature is not implemented yet.");
+            // Handle adding meal logic here
+            AddMealPanel addMealPanel = mainView.getAddMealPanel();
+            Date date = addMealPanel.getSelectedDate();
+            String type = addMealPanel.getSelectedMealType();
+            List<Ingredient> ingredients = addMealPanel.getSelectedIngredients();
+            if (date == null || type == null || ingredients.isEmpty()) {
+                mainView.showError("Please fill in all fields.");
+                return;
+            }
+            for (Ingredient ingredient : ingredients) {
+                if (ingredient.name().isEmpty() || ingredient.quantity().isEmpty()) {
+                    mainView.showError("All ingredients must have a name and quantity.");
+                    return;
+                }
+                // Optional: Fetch nutritional info if needed
+                // db.getNutritionalInfo(ingredients); // Optional: Fetch nutritional info if needed
+            }
+            
+            Meal meal = new Meal(date, type, ingredients, 0, 0, 0, 0);
+            if (db.addMeal(meal, currentUser.getEmail())) {
+                mainView.showMessage("Meal added successfully!");
+                addMealPanel.clearFields(); // Clear fields after adding meal
+            } else {
+                mainView.showError("Failed to add meal.");
+            }
         });
         mainView.getChangeProfilePanel().addSaveProfileListener(e -> handleSaveProfile());
         mainView.getChangeProfilePanel().addBackListener(e -> mainView.showCard(MainView.HOME));
 
-        // mainView.getFoodReplacementPanel().addBackListener(e -> mainView.showCard(MainView.HOME));
-        // mainView.getFoodReplacementPanel().addReplaceListener(e -> {
-        //     // Handle food replacement logic here
-        //     mainView.showMessage("Food replacement feature is not implemented yet.");
-        // });
+        mainView.getFoodReplacementPanel().addBackListener(e -> mainView.showCard(MainView.HOME));
+        mainView.getFoodReplacementPanel().addReplaceListener(e -> {
+            // Handle food replacement logic here
+            mainView.showMessage("Food replacement feature is not implemented yet.");
+        });
     }
 
     private void handleLogin() {

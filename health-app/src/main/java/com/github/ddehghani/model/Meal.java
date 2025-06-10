@@ -5,13 +5,13 @@ import java.util.List;
 public class Meal {
     private Date date;
     private String type;
-    private List<Ingredient> ingredients;
+    private List<FoodItem> ingredients;
     private double calories;
     private double proteins;
     private double carbs;
     private double fats;
 
-    public Meal(Date date, String type, List<Ingredient> ingredients,
+    public Meal(Date date, String type, List<FoodItem> ingredients,
                 double calories, double proteins, double carbs, double fats) {
         this.date = date;
         this.type = type;
@@ -31,7 +31,7 @@ public class Meal {
         return type;
     }
 
-    public List<Ingredient> getIngredients() {
+    public List<FoodItem> getIngredients() {
         return ingredients;
     }
 

@@ -13,8 +13,13 @@ public interface Database {
     boolean updateUserProfile(User user);
     boolean addMeal(Meal meal, String email);
     String[] getIngredients(); // Returns an array of all possible ingredient names
-    List<Meal> getMeals(String email); // Returns meals for a specific user
-    List<Meal> getMeals(String email, String startDate, String endDate);
-
+    List<Meal> getMealsByUser(String email); // Returns meals for a specific user
+    List<Meal> getMealsByUserAndPeriod(String email, String startDate, String endDate);
     
+    // for future features
+    String getFoodCategory(String foodName); // Returns the category of a food item
+    List<String> getFoodItemsByCategory(String category); // Returns a list of food items matching the nam
+    NutritionalInfo getNutritionalInfo(FoodItem foodName); // Returns nutritional info for a food item
+    NutritionalInfo getRecommendedDailyNutrition(); // Returns recommended daily nutrition values
+    String getPercentageOfFoodGroup(); // From CFG
 }

@@ -38,7 +38,7 @@ public class MainController {
         });
 
         mainView.getHomePanel().addFoodReplacementListener(e -> {
-            List<Meal> meals = db.getMeals(currentUser.getEmail());
+            List<Meal> meals = db.getMealsByUser(currentUser.getEmail());
             String[] mealOptions = meals.stream()
                     .map(Meal::toString)
                     .toArray(String[]::new);
@@ -56,12 +56,12 @@ public class MainController {
             AddMealPanel addMealPanel = mainView.getAddMealPanel();
             Date date = addMealPanel.getSelectedDate();
             String type = addMealPanel.getSelectedMealType();
-            List<Ingredient> ingredients = addMealPanel.getSelectedIngredients();
+            List<FoodItem> ingredients = addMealPanel.getSelectedIngredients();
             if (date == null || type == null || ingredients.isEmpty()) {
                 mainView.showError("Please fill in all fields.");
                 return;
             }
-            for (Ingredient ingredient : ingredients) {
+            for (FoodItem ingredient : ingredients) {
                 if (ingredient.name().isEmpty() || ingredient.quantity().isEmpty()) {
                     mainView.showError("All ingredients must have a name and quantity.");
                     return;

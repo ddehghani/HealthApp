@@ -1,6 +1,6 @@
 package com.github.ddehghani.view;
 
-import com.github.ddehghani.model.Ingredient;
+import com.github.ddehghani.model.FoodItem;
 
 import javax.swing.*;
 import java.awt.*;
@@ -184,12 +184,12 @@ public class AddMealPanel extends GradientPanel {
         }
     }
 
-    public List<Ingredient> getSelectedIngredients() {
-        List<Ingredient> result = new ArrayList<>();
+    public List<FoodItem> getSelectedIngredients() {
+        List<FoodItem> result = new ArrayList<>();
         for (int i = 0; i < ingredientComboBoxes.size(); i++) {
             String name = (String) ingredientComboBoxes.get(i).getSelectedItem();
             String quantity = quantityFields.get(i).getText();
-            result.add(new Ingredient(name, quantity));
+            result.add(new FoodItem(name, quantity));
         }
         return result;
     }

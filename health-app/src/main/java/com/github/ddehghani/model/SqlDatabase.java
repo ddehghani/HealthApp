@@ -184,7 +184,7 @@ public class SqlDatabase implements Database {
     }
 
     @Override
-    public List<Meal> getMeals(String email) {
+    public List<Meal> getMealsByUser(String email) {
         List<Meal> meals = new ArrayList<>();
         String sql = "SELECT * FROM meals WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -207,7 +207,7 @@ public class SqlDatabase implements Database {
     }
 
     @Override
-    public List<Meal> getMeals(String email, String startDate, String endDate) {
+    public List<Meal> getMealsByUserAndPeriod(String email, String startDate, String endDate) {
         List<Meal> meals = new ArrayList<>();
         String sql = "SELECT * FROM meals WHERE email = ? AND date BETWEEN ? AND ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -229,5 +229,30 @@ public class SqlDatabase implements Database {
             e.printStackTrace();
         }
         return meals;
+    }
+
+    @Override
+    public String getFoodCategory(String foodName) {
+        return null;
+    }
+
+    @Override
+    public List<String> getFoodItemsByCategory(String category) {
+        return null;
+    }
+
+    @Override
+    public NutritionalInfo getNutritionalInfo(FoodItem foodName) {
+        return null;
+    }
+
+    @Override
+    public NutritionalInfo getRecommendedDailyNutrition() {
+        return null;
+    }
+
+    @Override
+    public String getPercentageOfFoodGroup() {
+        return null;
     }
 }

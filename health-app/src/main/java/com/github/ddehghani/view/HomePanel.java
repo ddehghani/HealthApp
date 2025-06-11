@@ -3,6 +3,7 @@ package com.github.ddehghani.view;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import com.github.ddehghani.model.User;
 
 public class HomePanel extends GradientPanel {
     private JLabel welcomeLabel;
@@ -58,5 +59,13 @@ public class HomePanel extends GradientPanel {
 
     public void addLogoutListener(ActionListener listener) {
         logoutButton.addActionListener(listener);
+    }
+
+    public void setUserDetails(User user) {
+        if (user != null) {
+            welcomeLabel.setText("Welcome, " + user.getFirstName() + "!");
+        } else {
+            welcomeLabel.setText("Welcome, Guest!");
+        }
     }
 }

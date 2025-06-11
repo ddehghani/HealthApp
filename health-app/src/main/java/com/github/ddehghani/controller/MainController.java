@@ -102,6 +102,7 @@ public class MainController {
             currentUser = userOpt.get();
             mainView.showMessage("Login successful!");
             mainView.getLoginPanel().clearFields(); // Clear fields on successful login
+            mainView.getHomePanel().setUserDetails(currentUser);
             mainView.showCard(MainView.HOME);
         } else {
             mainView.showError("Invalid email or password.");
@@ -139,6 +140,7 @@ public class MainController {
         if (db.updateUserProfile(updatedUser)) {
             currentUser = updatedUser;
             mainView.showMessage("Profile updated successfully!");
+            mainView.getHomePanel().setUserDetails(currentUser);
             mainView.showCard(MainView.HOME);
         } else {
             mainView.showError("Failed to update profile.");
@@ -178,8 +180,4 @@ public class MainController {
             mainView.showError("Registration failed. Please try again.");
         }
     }
-
-    public static void main(String[] args) {
-        new MainController();
-    } 
 }

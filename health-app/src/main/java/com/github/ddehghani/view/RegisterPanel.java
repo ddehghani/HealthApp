@@ -20,7 +20,11 @@ public class RegisterPanel extends GradientPanel {
     private JPasswordField confirmPasswordField;
     
     public RegisterPanel() {
-        setLayout(new GridBagLayout());
+        JPanel card = new WhiteCardPanel();
+        card.setOpaque(false);
+        card.setLayout(new GridBagLayout());
+        card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -37,74 +41,80 @@ public class RegisterPanel extends GradientPanel {
         passwordField = new JPasswordField();
         confirmPasswordField = new JPasswordField();
 
-        registerButton = new JButton("Register");
-        switchToLogin = new JButton("Back to Login");
+        registerButton = new GradientButton("Register");
+        switchToLogin = new GradientButton("Back to Login");
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        add(new JLabel("First Name:"), gbc);
+        card.add(new JLabel("First Name:"), gbc);
         gbc.gridx = 1;
-        add(firstNameField, gbc);
+        gbc.ipadx = 85;
+        card.add(firstNameField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
-        add(new JLabel("Last Name:"), gbc);
+        gbc.ipadx = 10;
+        card.add(new JLabel("Last Name:"), gbc);
         gbc.gridx = 1;
-        add(lastNameField, gbc);
+        card.add(lastNameField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
-        add(new JLabel("Sex:"), gbc);
+        card.add(new JLabel("Sex:"), gbc);
         gbc.gridx = 1;
-        add(sexComboBox, gbc);
+        card.add(sexComboBox, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 3;
-        add(new JLabel("Unit:"), gbc);
+        card.add(new JLabel("Unit:"), gbc);
         gbc.gridx = 1;
-        add(unitComboBox, gbc);
+        card.add(unitComboBox, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 4;
-        add(new JLabel("Height:"), gbc);
+        card.add(new JLabel("Height:"), gbc);
         gbc.gridx = 1;
-        add(heightField, gbc);
+        card.add(heightField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 5;
-        add(new JLabel("Weight:"), gbc);
+        card.add(new JLabel("Weight:"), gbc);
         gbc.gridx = 1;
-        add(weightField, gbc);
+        card.add(weightField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 6;
-        add(new JLabel("Date of Birth:"), gbc);
+        card.add(new JLabel("Date of Birth:"), gbc);
         gbc.gridx = 1;
-        add(dobField, gbc);
+        card.add(dobField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 7;
-        add(new JLabel("Email:"), gbc);
+        card.add(new JLabel("Email:"), gbc);
         gbc.gridx = 1;
-        add(emailField, gbc);
+        card.add(emailField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 8;
-        add(new JLabel("Password:"), gbc);
+        card.add(new JLabel("Password:"), gbc);
         gbc.gridx = 1;
-        add(passwordField, gbc);
+        card.add(passwordField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 9;
-        add(new JLabel("Re-enter Password:"), gbc);
+        card.add(new JLabel("Re-enter Pass:"), gbc);
         gbc.gridx = 1;
-        add(confirmPasswordField, gbc);
+        card.add(confirmPasswordField, gbc);
 
+        gbc.insets = new Insets(20, 5, 5, 5);
         gbc.gridx = 0;
         gbc.gridy = 10;
-        add(registerButton, gbc);
+        card.add(switchToLogin, gbc);
         gbc.gridx = 1;
-        add(switchToLogin, gbc);
+        card.add(registerButton, gbc);
+
+        setLayout(new GridBagLayout());
+        add(card);
     }
 
 

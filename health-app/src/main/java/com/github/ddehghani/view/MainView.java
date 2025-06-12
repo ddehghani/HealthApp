@@ -25,8 +25,8 @@ public class MainView extends JFrame {
     public MainView() {
         setTitle("Health App");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(500, 500);
-        setMinimumSize(new Dimension(400, 500));
+        setSize(800, 600);
+        setMinimumSize(new Dimension(600, 600));
         setLocationRelativeTo(null); // Center the window
 
         cardLayout = new CardLayout();

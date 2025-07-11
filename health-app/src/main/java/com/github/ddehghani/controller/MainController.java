@@ -184,7 +184,7 @@ public class MainController {
             }
             
             List<String[]> goalStrings = foodRep.getSelectedGoals();
-            Goal[] goals = new Goal[goalStrings.size()];
+            List<Goal> goals = new ArrayList<>();
             for (int i = 0; i < goalStrings.size(); i++) {
                 String[] goalString = goalStrings.get(i);
                 boolean increase = goalString[0].equals("increase");
@@ -192,14 +192,22 @@ public class MainController {
                 double intensity;
                 double currentNutrientValue = db.getMealNutrtionalValue(selectedMeal).getNutrient(nutrient);
                 if (goalString[3].equals("%")) {
-                    intensity = currentNutrientValue * 1 + ( increase? 1 : -1 ) * Double.parseDouble(goalString[2])/100.0;
+                    intensity = currentNutrientValue * (1 + ( increase? 1 : -1 ) * Double.parseDouble(goalString[2])/100.0);
                 } else {
                     intensity = currentNutrientValue + Double.parseDouble(goalString[2]);
                 }
 
-                goals[i] = new Goal(nutrient, increase, intensity);
+                goals.add(new Goal(nutrient, increase, intensity));
             }
-            List<FoodItem> validAlternatives = db.getSwappedFoodOptions(selectedMeal, selectedFoodItem, goals);
+            List<FoodItem> mealFoodItems = selectedMeal.getFoodItems();
+            int foodItemIndex = -1;
+            for (int i = 0; i < mealFoodItems.size(); i++) {
+                if (mealFoodItems.get(i).equals(selectedFoodItem)) {
+                    foodItemIndex = i;
+                    break;
+                }
+            }
+            List<FoodItem> validAlternatives = db.getSwappedFoodOptions(selectedMeal, foodItemIndex, goals);
             mainView.showMessage(validAlternatives.toString());
         });
     }

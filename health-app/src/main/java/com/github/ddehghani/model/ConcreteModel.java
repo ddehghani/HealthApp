@@ -26,6 +26,7 @@ public class ConcreteModel implements Model, MealSubject {
     public static final String PATH_TO_CNF = "/Users/ddehghani/Desktop/Canada Nutrient File-20250623";
 
     // for swap functionality
+    public static final double errorPercentage = 10; // how far off is acceptable
     public static final String[] nutrientsToKeepSimilar = { 
             "ENERGY (KILOCALORIES)", 
             "PROTEIN", 
@@ -227,15 +228,6 @@ public class ConcreteModel implements Model, MealSubject {
         return result;
     }
 
-    private boolean isValidSwap(Nutrition originalMealNutrition, Nutrition swappedMealNutrition, Goal... goals) {
-        return 
-            Arrays.stream(nutrientsToKeepSimilar).allMatch(nutrient -> 
-                Arrays.stream(goals).anyMatch(goal -> goal.getNutrient().equals(nutrient) ) || // either nutirent appears in a goal
-                within10Percent(originalMealNutrition.getNutrient(nutrient), swappedMealNutrition.getNutrient(nutrient)) // or has to be similar to original meal
-            ) &&
-            Arrays.stream(goals).allMatch(goal -> goal.isSatisfiedBy(swappedMealNutrition)); // goals must be met
-    }
-
     public Nutrition getMealNutrtionalValue(Meal originalMeal) {
         Nutrition totalNutrition = new Nutrition();
         for (FoodItem item : originalMeal.getFoodItems()) {
@@ -284,6 +276,7 @@ public class ConcreteModel implements Model, MealSubject {
         }
 
         Nutrition result = new Nutrition(nutritions);
+        result.multiplyBy(foodItem.getQuantity());
         if (foodItem.getUnit() == null) // no unit available
             return result;
         // multiply by conversion factor of unit 
@@ -370,10 +363,6 @@ public class ConcreteModel implements Model, MealSubject {
         return foodNames;
     }
 
-    private boolean within10Percent(double original, double swapped) {
-        double diff = Math.abs(original - swapped);
-        return diff <= 0.1 * original;
-    }
 
     @Override
     public List<Meal> getMealsByDate(String email, Date date) {
@@ -387,11 +376,10 @@ public class ConcreteModel implements Model, MealSubject {
         """
             SELECT * 
             FROM meals m 
-            JOIN food_items f 
+            INNER JOIN food_items f 
             ON f.meal_id = m.id 
             WHERE m.email = ?
             AND m.date >= ? AND m.date <= ?
-            ORDER BY meal_id DESC;
         """;
         List<Meal> result = new ArrayList<>();
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -487,32 +475,120 @@ public class ConcreteModel implements Model, MealSubject {
     }
 
     @Override
-    public List<FoodItem> getSwappedFoodOptions(Meal originalMeal, FoodItem foodItem, Goal... goals) {
-        // calculate nutritions
-        Nutrition originalNutritionWithoutSelectedFoodItem = new Nutrition();
-        for (FoodItem ingredient : originalMeal.getFoodItems()) {
-            if (ingredient.equals(foodItem))
+    public List<FoodItem> getSwappedFoodOptions(Meal selectedMeal, int selectedFoodItemIndex, List<Goal> goals) {
+        // calculate nutritions for the selected meal and the selected meal without selected food item
+        Nutrition selectedMealNutritionMinusItem = new Nutrition();
+        for (int i = 0; i < selectedMeal.getFoodItems().size(); i++) {
+            if (i == selectedFoodItemIndex) // skip the food item we want to swap
                 continue;
-            originalNutritionWithoutSelectedFoodItem = 
-                originalNutritionWithoutSelectedFoodItem.add(getFoodItemNutrtionalValue(ingredient));
+
+            FoodItem ingredient = selectedMeal.getFoodItems().get(i);
+            selectedMealNutritionMinusItem = selectedMealNutritionMinusItem.add(getFoodItemNutrtionalValue(ingredient));
         }
-        Nutrition originalMealNutrition = originalNutritionWithoutSelectedFoodItem.add(getFoodItemNutrtionalValue(foodItem));
+
+        FoodItem selectedFoodItem = selectedMeal.getFoodItems().get(selectedFoodItemIndex);
+        Nutrition selectedFoodItemNutrition = getFoodItemNutrtionalValue(selectedFoodItem);
+        Nutrition selectedMealNutrition = selectedMealNutritionMinusItem.add(selectedFoodItemNutrition);
 
         List<FoodItem> result = new ArrayList<>();
-        for (FoodItem ingredient : originalMeal.getFoodItems()) {
-            if (!ingredient.equals(foodItem))
+        
+        List<String> foodItemAlternatives = getFoodNamesWithSameFoodCategoryAs(selectedFoodItem.getName());
+        for (String food: foodItemAlternatives) {
+            boolean isValidAlternative = true;
+            double high = 1000, low = 0; // initial range of valid quantities
+
+            List<String> units = getAvailableUnits(food); // get available units for the food item
+            //calculate nutrition of food item with first unit and quantity 1
+            FoodItem altFoodItem = new FoodItem(food, 1, units.isEmpty()? null: units.getFirst());
+            Nutrition altFoodItemNutrition = getFoodItemNutrtionalValue(altFoodItem);
+            for (Goal g: goals) {
+                
+                double intensity = g.getIntensity();
+                double selectedMealMinusItemNutrient = selectedMealNutritionMinusItem.getNutrient(g.getNutrient());
+                double altFoodItemNutrient = altFoodItemNutrition.getNutrient(g.getNutrient());
+                double criticalValue = (intensity - selectedMealMinusItemNutrient) / altFoodItemNutrient;
+                criticalValue = Math.max(criticalValue, 0);
+
+                double min = g.isIncrease() ? criticalValue : 0;
+                double max = g.isIncrease() ? Double.MAX_VALUE : criticalValue;
+
+                low = Math.max(low, min);
+                high = Math.min(high, max);
+
+
+                if (high <= low) { // early exit
+                    isValidAlternative = false;
+                    break; 
+                }
+            }
+            if (!isValidAlternative) // early exit 
+                continue;
+
+          
+            for (String nutrient: nutrientsToKeepSimilar) {
+                boolean nutrientIsUsedAsGoal = false;
+                for (Goal g : goals) {
+                    if (g.getNutrient().equals(nutrient)) {
+                        nutrientIsUsedAsGoal = true;
+                        break;
+                    }
+                }
+
+                if (nutrientIsUsedAsGoal) {
+                    continue;
+                }
+
+                double nutrientInOriginalMeal = selectedMealNutrition.getNutrient(nutrient);
+                double nutrientInMealWithoutItem = selectedMealNutritionMinusItem.getNutrient(nutrient);
+                double nutrientInAltFoodItem = altFoodItemNutrition.getNutrient(nutrient);
+                double max = (nutrientInOriginalMeal * (1 + errorPercentage / 100) - nutrientInMealWithoutItem)/nutrientInAltFoodItem;
+                double min = (nutrientInOriginalMeal * (1 - errorPercentage / 100) - nutrientInMealWithoutItem)/nutrientInAltFoodItem;
+
+                low = Math.max(low, min);
+                high = Math.min(high, max);
+
+                if (high <= low) { // early exit
+                    isValidAlternative = false;
+                    break; 
+                }
+            }
+
+            if (!isValidAlternative) // early exit
                 continue;
             
-            List<String> potentialAlternatives = getFoodNamesWithSameFoodCategoryAs(ingredient.getName());
-            for (String food: potentialAlternatives) {
-                List<String> units = getAvailableUnits(food);
-                FoodItem potentialAltFoodItem = new FoodItem(food, 1, units.isEmpty()? null: units.getFirst()); // can be other quantity than one so modify later
-                Nutrition swappedMealNutrition = originalNutritionWithoutSelectedFoodItem.add(getFoodItemNutrtionalValue(potentialAltFoodItem));
-                
-                if (isValidSwap(originalMealNutrition, swappedMealNutrition, goals)) {
-                    result.add(potentialAltFoodItem);
-                    if (result.size() > 5) return result; 
+            FoodItem updatedFoodItem = new FoodItem(altFoodItem.getName(), (low + high) / 2, altFoodItem.getUnit());
+            result.add(updatedFoodItem);
+            
+            if (result.size() > 5) 
+                break;
+        }
+
+        for (FoodItem fi : result) {
+            System.out.println("-------------------------------------");
+            System.out.println(fi);
+           
+            List<FoodItem> mealFoodItemsLocal = new ArrayList<>(selectedMeal.getFoodItems());
+            mealFoodItemsLocal.set(selectedFoodItemIndex, fi);
+            Meal swappedMeal = new Meal(selectedMeal.getDate(), mealFoodItemsLocal, selectedMeal.getType());
+
+            // find critical nutrients
+            List<String> criticalNutrients =  new ArrayList<>(List.of(nutrientsToKeepSimilar));
+            for (Goal g : goals) {
+                if (!criticalNutrients.contains(g.getNutrient())) {
+                    criticalNutrients.add(g.getNutrient());
                 }
+            }
+
+            // compare
+            Nutrition swappedMealNutrition = getMealNutrtionalValue(swappedMeal);
+            for (String nutrient: criticalNutrients) {
+                double originalValue = selectedMealNutrition.getNutrient(nutrient);
+                double swappedValue = swappedMealNutrition.getNutrient(nutrient);
+                double fiValue = getFoodItemNutrtionalValue(fi).getNutrient(nutrient);
+                System.out.println(nutrient + ": Original Meal: " + originalValue 
+                + "   swapped value: " + swappedValue 
+                + " (" + (swappedValue - originalValue) * 100 / originalValue + "%)"
+                + " food item: " + fiValue);
             }
         }
         

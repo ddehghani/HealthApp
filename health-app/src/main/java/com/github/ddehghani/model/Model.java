@@ -20,7 +20,7 @@ public interface Model {
     // UC 3
     List<Meal> getMealsByDate(String email, Date date);
     List<Meal> getMealsByTimeFrame(String email, Date begin, Date end);
-    List<FoodItem> getSwappedFoodOptions(Meal originalMeal, FoodItem foodItem, Goal... goals); // new based on prof's new request
+    List<FoodItem> getSwappedFoodOptions(Meal originalMeal,  int foodItemIndex, List<Goal> goals); // new based on prof's new request
     List<String> getNutrientNames();
     Nutrition getMealNutrtionalValue(Meal originalMeal); // new
     Nutrition getFoodItemNutrtionalValue(FoodItem foodItem); // + getNutritionalValue(foodItem: FoodItem): Nutrition

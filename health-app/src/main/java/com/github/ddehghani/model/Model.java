@@ -30,5 +30,5 @@ public interface Model {
     List<String> getFoodNamesWithSameFoodCategoryAs(String foodName); // + getAlternativeFoodItemsByCategory(category: String): List<String>
     List<String> getAvailableUnits(String foodName); // new can return empty set
    
-    Map<String, Double> getDailyRecommendationsFromCFG();
+    CFGFoodGroup getDailyRecommendationsFromCFG(UserProfile profile); // + getDailyCFGRecommendations(profile: UserProfile): CFGFoodGroup
 }
